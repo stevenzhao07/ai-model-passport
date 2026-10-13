@@ -1,0 +1,41 @@
+{
+  "id": "ai-model-passport",
+  "title": "AI 护照身份档案参考实现（身份/溯源/追责）",
+  "description": "把「护照官（AI 护照制度）」理念做成可部署的参考实现：为每一个 AI 系统签发一份机器可读的『AI 护照』JSON（身份、模型卡引用、训练数据、预期用途、风险分级、符合性声明、签发哈希），支持签发与验证。（对应『AI 护照系统』能力缺口。）",
+  "triggers": {
+    "keywords": [
+      "ai-passport",
+      "passport",
+      "identity",
+      "provenance",
+      "traceability",
+      "AI护照"
+    ],
+    "file_patterns": [
+      "ai_passport.py"
+    ],
+    "intents": [
+      "AI护照",
+      "身份档案",
+      "溯源追责"
+    ]
+  },
+  "provides": [
+    "ai-model-passport",
+    "passport",
+    "ai-identity",
+    "provenance"
+  ],
+  "skills": [],
+  "needs_backends": [],
+  "license": "CC0",
+  "upstream": null,
+  "cost": "low",
+  "lazy": true,
+  "nested": true,
+  "entry": "scripts/ai_passport.py",
+  "deps": [],
+  "generated_by": "lgd-skeleton/1.0 (manual port from rea scaffold)",
+  "idea": "AI 护照制度（身份/溯源/追责）参考实现",
+  "extension_note": "新增符合性声明类型：在 `CONFORMANCE_CLAIMS` 枚举扩展，验证器自动校验。"
+}

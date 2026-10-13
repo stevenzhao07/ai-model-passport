@@ -1,0 +1,2 @@
+# 扩展点（plugins/）
+新增符合性声明类型：在 `CONFORMANCE_CLAIMS` 枚举扩展，验证器自动校验。

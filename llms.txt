@@ -1,0 +1,8 @@
+ai-model-passport
+========================
+可插拔模块（lgd-skeleton/1.0）。AI 护照身份档案参考实现（身份/溯源/追责）。
+入口: scripts/ai_passport.py
+元数据: module.json
+总入口: medical-ai-toolkit
+关联: ai-a3-laws, ai-governance-checklist, delivery-guard
+许可: CC0 · 贡献者: @stevenzhao07 (MedXpert)
