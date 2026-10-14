@@ -1,0 +1,12 @@
+{
+  "schema_version": "ai-passport/1.0",
+  "passport_id": "pp-x-20261014",
+  "issuer": "@stevenzhao07/MedXpert",
+  "model": "X",
+  "intended_use": "diagnosis",
+  "risk_class": "II",
+  "training_data_refs": [],
+  "conformance_claims": [],
+  "issued_at": "2026-10-14T05:15:42.268212+00:00",
+  "hash": "9e6fefb4b6cd1b3888987cad11e972212ec2fed21c40257dfec1ac6a400f6cc2"
+}
