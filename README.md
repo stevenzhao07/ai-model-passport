@@ -1,6 +1,8 @@
 # ai-model-passport
 
-> **Contributed by [@stevenzhao07](https://github.com/stevenzhao07) · Affiliation: MedXpert (medical-device RA & regulatory consultancy) · Pure technical input, no commercial promotion.**
+> Contributed by [@stevenzhao07](https://github.com/stevenzhao07) as an individual project owner.
+> "MedXpert" is an unregistered project identifier — see the account profile for name status.
+> This repo is not affiliated with any legal entity and contains no commercial promotion.
 
 把「护照官（AI 护照制度）」理念做成可部署的参考实现：为每一个 AI 系统签发一份机器可读的『AI 护照』JSON（身份、模型卡引用、训练数据、预期用途、风险分级、符合性声明、签发哈希），支持签发与验证。（对应『AI 护照系统』能力缺口。）
 
