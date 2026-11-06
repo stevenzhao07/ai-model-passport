@@ -4,8 +4,6 @@
 
 # ai-model-passport
 
-[![Auto Eval: LGD + OpenSSF](https://github.com/stevenzhao07/ai-model-passport/actions/workflows/auto-eval.yml/badge.svg)](https://github.com/stevenzhao07/ai-model-passport/actions/workflows/auto-eval.yml)
-
 > Contributed by [@stevenzhao07](https://github.com/stevenzhao07) as an individual project owner.
 > "MedXpert" is an unregistered project identifier — see the account profile for name status.
 > This repo is not affiliated with any legal entity and contains no commercial promotion.
