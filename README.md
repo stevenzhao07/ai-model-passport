@@ -1,3 +1,5 @@
+<!-- LGD-SCORE -->**LGD Trust Score: 77/100**<!-- /LGD-SCORE -->
+
 # ai-model-passport
 
 [![Auto Eval: LGD + OpenSSF](https://github.com/stevenzhao07/ai-model-passport/actions/workflows/auto-eval.yml/badge.svg)](https://github.com/stevenzhao07/ai-model-passport/actions/workflows/auto-eval.yml)
