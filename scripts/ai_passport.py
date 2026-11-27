@@ -20,12 +20,33 @@ import argparse
 import hashlib
 import json
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 SCHEMA_VERSION = "ai-passport/1.0"
 VALID_RISK = {"I", "II", "III", "IV"}
 # intended_use 为必填：预期用途是护照的实质内容（领域复审 P1 修复项）
 REQUIRED = ["passport_id", "issuer", "model", "intended_use", "risk_class"]
+
+# 分级：谁背的书。缺这一级时，读者无法区分"我们自己声明"和"第三方核验过"，
+# 于是"护照"会被默认读成"认证"。默认值刻意选最弱的一档。
+TIER_SELF = "self-attested"
+TIER_THIRD = "third-party-attested"
+VALID_TIER = {TIER_SELF, TIER_THIRD}
+# 护照不等于认证。这一句要写进文件，而不是只写在 README 里。
+NOT_AN_ACCREDITATION = True
+# 到期默认值：不填 = 不设期限（与既有行为一致），但验证器会把"没有期限"如实说出来。
+DEFAULT_VALID_DAYS = None
+
+
+def _parse_time(value):
+    """接受 2026-10-14T05:15:42Z / +00:00 两种写法；解析失败返回 None。"""
+    if not isinstance(value, str):
+        return None
+    try:
+        dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
 
 
 def _sanitize_id(name: str) -> str:
@@ -41,33 +62,55 @@ def _canonical(obj: dict) -> bytes:
 
 def issue(name: str, risk_class: str, issuer: str = "@stevenzhao07/MedXpert",
           intended_use: str = "", training_data_refs: list | None = None,
-          conformance_claims: list | None = None) -> dict:
+          conformance_claims: list | None = None,
+          valid_days: int | None = None,
+          trust_tier: str = TIER_SELF) -> dict:
     if risk_class not in VALID_RISK:
         raise ValueError(f"risk_class 须为 {sorted(VALID_RISK)} 之一")
+    if trust_tier not in VALID_TIER:
+        raise ValueError(f"trust_tier 须为 {sorted(VALID_TIER)} 之一")
     if not intended_use or not intended_use.strip():
         raise ValueError("intended_use 为必填：AI 护照须声明预期用途（领域复审 P1 修复项）")
+    now = datetime.now(timezone.utc)
     pp = {
         "schema_version": SCHEMA_VERSION,
-        "passport_id": f"pp-{_sanitize_id(name)}-{datetime.now(timezone.utc).strftime('%Y%m%d')}",
+        "passport_id": f"pp-{_sanitize_id(name)}-{now.strftime('%Y%m%d')}",
         "issuer": issuer,
         "model": name,
         "intended_use": intended_use,
         "risk_class": risk_class,
         "training_data_refs": training_data_refs or [],
         "conformance_claims": conformance_claims or [],
-        "issued_at": datetime.now(timezone.utc).isoformat(),
+        "issued_at": now.isoformat(),
+        "trust_tier": trust_tier,
+        "not_an_accreditation": NOT_AN_ACCREDITATION,
     }
+    if valid_days is not None:
+        pp["valid_until"] = (now + timedelta(days=int(valid_days))).strftime("%Y-%m-%dT%H:%M:%SZ")
     pp["hash"] = hashlib.sha256(_canonical(pp)).hexdigest()
     return pp
 
 
-def verify(pp: dict) -> list[str]:
+def verify(pp: dict, now: datetime | None = None) -> list[str]:
     errs = []
     for k in REQUIRED:
         if not pp.get(k):
             errs.append(f"缺少必填字段: {k}")
     if pp.get("risk_class") and pp.get("risk_class") not in VALID_RISK:
         errs.append(f"risk_class 非法: {pp.get('risk_class')}")
+    tier = pp.get("trust_tier")
+    if tier is None:
+        errs.append("缺少 trust_tier：读者无法区分自签声明与第三方核验")
+    elif tier not in VALID_TIER:
+        errs.append(f"trust_tier 非法: {tier}")
+    elif tier == TIER_SELF and pp.get("not_an_accreditation") is not True:
+        errs.append("自签分级须显式写 not_an_accreditation: true")
+    if "valid_until" in pp:
+        due = _parse_time(pp["valid_until"])
+        if due is None:
+            errs.append(f"valid_until 无法解析: {pp['valid_until']!r}")
+        elif (now or datetime.now(timezone.utc)) >= due:
+            errs.append(f"护照已过期（valid_until={pp['valid_until']}）")
     if "hash" not in pp:
         errs.append("缺少 hash 指纹")
     else:
@@ -95,6 +138,10 @@ def main() -> int:
     pi.add_argument("--risk-class", required=True, choices=sorted(VALID_RISK))
     pi.add_argument("--intended-use", required=True,
                     help="预期用途（必填：AI 护照须声明预期用途）")
+    pi.add_argument("--valid-days", type=int, default=None,
+                    help="有效期天数；不填则不设期限，验证器如实报“无期限”，不假装已核验时效")
+    pi.add_argument("--trust-tier", default=TIER_SELF, choices=sorted(VALID_TIER),
+                    help="谁背的书：self-attested（默认，自签）或 third-party-attested")
     pi.add_argument("--out", default="passport.json")
     pv = sub.add_parser("verify", help="验证护照")
     pv.add_argument("file", help="护照 JSON 路径")
@@ -106,7 +153,8 @@ def main() -> int:
 
     if args.cmd == "issue":
         try:
-            pp = issue(args.name, args.risk_class, intended_use=args.intended_use)
+            pp = issue(args.name, args.risk_class, intended_use=args.intended_use,
+                       valid_days=args.valid_days, trust_tier=args.trust_tier)
         except ValueError as e:
             print(f"[error] {e}", file=sys.stderr)
             return 2

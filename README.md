@@ -27,7 +27,14 @@
 
 ## 特性
 
-- 护照 schema：schema_version / passport_id / issuer / model / intended_use / risk_class(I–IV) / training_data_refs / conformance_claims / issued_at / hash
+- 护照 schema：schema_version / passport_id / issuer / model / intended_use / risk_class(I–IV) / training_data_refs / conformance_claims / issued_at / trust_tier / not_an_accreditation / valid_until（可选）/ hash
+
+### 分级与时效（2026-11-27 起）
+
+- `trust_tier`：`self-attested`（自签，默认）或 `third-party-attested`（第三方核验）。缺这一级时，读者会把"我们自己声明"读成"谁给我们认证过"，所以现在缺它直接判 BLOCK。
+- `not_an_accreditation`：自签护照必须显式为 `true`。护照不是认证，这句话写在文件里，不只写在 README 里。
+- `valid_until`：可选；`--valid-days N` 签发即带期限，`verify` 过期判 BLOCK。不填则不设期限，验证器如实报"无期限"，不假装已核验时效。
+- `hash` 仍是"排除 hash 字段后的规范化 SHA-256"，新增字段后需重算（`scripts/ai_passport.py` 的 `issue()` 会自动算）。
 - 签发：`issue()` 对规范化 JSON 计算 SHA-256 作为防篡改指纹
 - 验证：`verify()` 校验指纹 + 必填字段 + 风险分级合法
 - 零依赖 + CLI：`issue` / `verify` 子命令
