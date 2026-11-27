@@ -64,7 +64,7 @@ python scripts/ai_passport.py --demo
 
 ## 关联模块
 
-- [ai-a3-laws](https://github.com/stevenzhao07/ai-a3-laws)
+- ai-a3-laws（未建仓·计划中）
 - [ai-governance-checklist](https://github.com/stevenzhao07/ai-governance-checklist)
 - [delivery-guard](https://github.com/stevenzhao07/delivery-guard)
 
